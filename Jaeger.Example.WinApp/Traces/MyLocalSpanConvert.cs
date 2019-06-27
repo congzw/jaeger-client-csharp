@@ -1,4 +1,4 @@
-﻿namespace Jaeger.Example.WinApp.Helpers
+﻿namespace Jaeger.Example.WinApp.Traces
 {
     public class MyLocalSpanConvert
     {

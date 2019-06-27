@@ -2,48 +2,41 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
-using System.Threading;
 using System.Threading.Tasks;
-using System.Windows.Forms;
 using Jaeger.Example.Common;
-using Jaeger.Reporters;
+using Jaeger.Example.WinApp.Helpers;
 
-namespace Jaeger.Example.WinApp.Helpers
+namespace Jaeger.Example.WinApp.Traces
 {
-    public class MyLocalReporter : IReporter
+    public class MyLocalFileFlusher: IDisposable
     {
-        public static Func<bool> ShouldRecording = () => true;
+        public async Task AppendSpanAsync(Span span)
+        {
+            await Task.Run(() =>
+            {
+                //_logHelper.Info(@"!!! AppendSpanAsync: " + span.OperationName);
+                var myLocalSpan = Convert.Convert(span);
+                MyLocalSpans.Enqueue(myLocalSpan);
+            });
+        }
+
+        public Func<bool> ShouldRecording = () => true;
 
         private readonly MyLogHelper _logHelper;
         private readonly Task _flushTask;
         public TimeSpan FlushInterval { get; set; }
         public ConcurrentQueue<MyLocalSpan> MyLocalSpans { get; set; }
-
-        public MyLocalReporter(TimeSpan flushInterval, MyLocalSpanConvert convert, MyLogHelper logHelper)
+        public MyLocalSpanConvert Convert { get; set; }
+        
+        public MyLocalFileFlusher(TimeSpan flushInterval, MyLocalSpanConvert convert, MyLogHelper logHelper)
         {
             _logHelper = logHelper;
             FlushInterval = flushInterval;
             Convert = convert;
             MyLocalSpans = new ConcurrentQueue<MyLocalSpan>();
-           _flushTask = Task.Factory.StartNew(FlushLoop, TaskCreationOptions.LongRunning);
-        }
-        
-        public MyLocalSpanConvert Convert { get; set; }
-
-        public void Report(Span span)
-        {
-            //_logHelper.Info(@"!!! MyLocalReporter Report Span: " + span.OperationName);
-            var myLocalSpan = Convert.Convert(span);
-            MyLocalSpans.Enqueue(myLocalSpan);
+            _flushTask = Task.Factory.StartNew(FlushLoop, TaskCreationOptions.LongRunning);
         }
 
-        public Task CloseAsync(CancellationToken cancellationToken)
-        {
-            //flush any way?
-            //_logHelper.Info(@"!!! MyLocalReporter CloseAsync ");
-            return Task.FromResult(0);
-        }
-        
         private void SaveToFile(IList<MyLocalSpan> myLocalSpans)
         {
             if (myLocalSpans == null || myLocalSpans.Count == 0)
@@ -63,13 +56,23 @@ namespace Jaeger.Example.WinApp.Helpers
                 }
                 toSaveSpans.AddRange(myLocalSpans);
                 jsonFileHelper.Save(toSaveSpans, filePath);
-                _logHelper.Info($"try save {toSaveSpans.Count} spans to file: {filePath}");
+                if (!_disposing)
+                {
+                    _logHelper.Info($"try save {toSaveSpans.Count} spans to file: {filePath}");
+                }
 
-                File.AppendAllText(AppDomain.CurrentDomain.Combine($"trace_flush.txt"), DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss\r\n"));
+                File.AppendAllText(AppDomain.CurrentDomain.Combine($"trace_flush.txt"), 
+                    string.Format("{0} flush count: {1}{2}", 
+                        DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"), 
+                        toSaveSpans.Count, 
+                        Environment.NewLine));
             }
             catch (Exception ex)
             {
-                _logHelper.InfoException(ex);
+                if (!_disposing)
+                {
+                    _logHelper.InfoException(ex);
+                }
             }
         }
 
@@ -101,6 +104,22 @@ namespace Jaeger.Example.WinApp.Helpers
                 await Task.Delay(FlushInterval).ConfigureAwait(false);
                 Flush();
             }
+        }
+
+        private bool _disposing = false;
+        public void Dispose()
+        {
+            try
+            {
+                _disposing = true;
+                Flush();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                File.AppendAllText(AppDomain.CurrentDomain.Combine($"trace_ex.txt"),  e.Message);
+            }
+            _flushTask?.Dispose();
         }
     }
 }

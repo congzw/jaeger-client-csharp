@@ -1,5 +1,6 @@
 ﻿using System;
 using Jaeger.Example.Common;
+using Jaeger.Example.WinApp.Traces;
 using Jaeger.Reporters;
 using Jaeger.Samplers;
 using Jaeger.Senders;
@@ -9,12 +10,10 @@ namespace Jaeger.Example.WinApp.Helpers
     public class JaegerFactory
     {
         private static Tracer _tracer = null;
-
         public static Tracer GetCurrentTracer()
         {
             return _tracer ?? (_tracer = CreateTracer("http://localhost:14268/api/traces", "Demo-Service"));
         }
-
         public static Tracer CreateTracer(string endPoint, string serviceName)
         {
             var traceBuilder = new Tracer.Builder(serviceName)
@@ -48,6 +47,12 @@ namespace Jaeger.Example.WinApp.Helpers
             return new DemoHelper(tracer);
         }
 
+        private static MyLocalFileFlusher _flusher = null;
+        public static MyLocalFileFlusher GetMyLocalFileFlusher()
+        {
+            return _flusher ?? (_flusher = new MyLocalFileFlusher(TimeSpan.FromSeconds(30), new MyLocalSpanConvert(), GetMyLogHelper()));
+        }
+
         private static MyLogHelper _myLogHelper = null;
         public static MyLogHelper GetMyLogHelper()
         {
@@ -57,10 +62,10 @@ namespace Jaeger.Example.WinApp.Helpers
         private static MyLocalReporter _theLocalReporter = null;
         public static MyLocalReporter GetLocalReporter()
         {
-            var myLogHelper = GetMyLogHelper();
-            return _theLocalReporter ?? (_theLocalReporter =
-                       new MyLocalReporter(TimeSpan.FromSeconds(30), new MyLocalSpanConvert(), myLogHelper));
+            var myLocalFileFlusher = GetMyLocalFileFlusher();
+            return _theLocalReporter ?? (_theLocalReporter = new MyLocalReporter(myLocalFileFlusher));
         }
+
         public static void Init()
         {
             var myLogHelper = GetMyLogHelper();

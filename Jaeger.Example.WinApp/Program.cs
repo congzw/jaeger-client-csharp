@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Windows.Forms;
 using Jaeger.Example.WinApp.Helpers;
+using Jaeger.Example.WinApp.Traces;
 
 namespace Jaeger.Example.WinApp
 {
@@ -22,7 +23,9 @@ namespace Jaeger.Example.WinApp
         private static void Application_ApplicationExit(object sender, EventArgs e)
         {
             //MessageBox.Show(@"!!!Application_ApplicationExit!!!");
-            MyLocalReporter.ShouldRecording = () => false;
+            var myLocalFileFlusher = JaegerFactory.GetMyLocalFileFlusher();
+            myLocalFileFlusher.ShouldRecording = () => false;
+            myLocalFileFlusher.Dispose();
         }
     }
 }
