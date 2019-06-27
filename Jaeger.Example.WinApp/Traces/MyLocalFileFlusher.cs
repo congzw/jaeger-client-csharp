@@ -15,7 +15,7 @@ namespace Jaeger.Example.WinApp.Traces
             await Task.Run(() =>
             {
                 //_logHelper.Info(@"!!! AppendSpanAsync: " + span.OperationName);
-                var myLocalSpan = Convert.Convert(span);
+                var myLocalSpan = Convert.Convert(span, span.Tracer.Clock.UtcNow());
                 MyLocalSpans.Enqueue(myLocalSpan);
             });
         }

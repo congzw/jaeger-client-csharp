@@ -60,7 +60,7 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Helpers\AsyncFormEventBus.cs" />
-    <Compile Include="Traces\MyLocalFileRepository.cs" />
+    <Compile Include="Traces\MyLocalFileFlusher.cs" />
     <Compile Include="Traces\MyLocalSpan.cs" />
     <Compile Include="Helpers\DemoHelper.cs" />
     <Compile Include="Helpers\JaegerFactory.cs" />
