@@ -1,4 +1,5 @@
-﻿using Jaeger.Example.Common;
+﻿using System;
+using Jaeger.Example.Common;
 using Jaeger.Reporters;
 using Jaeger.Samplers;
 using Jaeger.Senders;
@@ -8,7 +9,6 @@ namespace Jaeger.Example.WinApp.Helpers
     public class JaegerFactory
     {
         private static Tracer _tracer = null;
-        private static MyLocalReporter _theLocalReporter = null;
 
         public static Tracer GetCurrentTracer()
         {
@@ -32,8 +32,7 @@ namespace Jaeger.Example.WinApp.Helpers
                 .WithSender(sender)
                 .Build();
 
-            var myLogHelper = GetMyLogHelper();
-            _theLocalReporter = new MyLocalReporter(new MyLocalSpanCache(), new MyLocalSpanConvert(), myLogHelper);
+            _theLocalReporter = GetLocalReporter();
             var compositeReporter = new CompositeReporter(_theLocalReporter, reporter);
 
             var tracer = traceBuilder
@@ -55,7 +54,13 @@ namespace Jaeger.Example.WinApp.Helpers
             return _myLogHelper ?? (_myLogHelper = new MyLogHelper("[Default]"){WithPrefix = false});
         }
 
-
+        private static MyLocalReporter _theLocalReporter = null;
+        public static MyLocalReporter GetLocalReporter()
+        {
+            var myLogHelper = GetMyLogHelper();
+            return _theLocalReporter ?? (_theLocalReporter =
+                       new MyLocalReporter(TimeSpan.FromSeconds(30), new MyLocalSpanConvert(), myLogHelper));
+        }
         public static void Init()
         {
             var myLogHelper = GetMyLogHelper();

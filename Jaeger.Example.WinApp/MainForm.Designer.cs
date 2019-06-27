@@ -32,6 +32,10 @@
             this.txtOps = new System.Windows.Forms.TextBox();
             this.btnCall = new System.Windows.Forms.Button();
             this.txtLogs = new System.Windows.Forms.TextBox();
+            this.label2 = new System.Windows.Forms.Label();
+            this.cbxCount = new System.Windows.Forms.ComboBox();
+            this.cbxSeconds = new System.Windows.Forms.ComboBox();
+            this.label3 = new System.Windows.Forms.Label();
             this.SuspendLayout();
             // 
             // label1
@@ -75,11 +79,53 @@
             this.txtLogs.Size = new System.Drawing.Size(560, 147);
             this.txtLogs.TabIndex = 9;
             // 
+            // label2
+            // 
+            this.label2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(12, 168);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(59, 12);
+            this.label2.TabIndex = 11;
+            this.label2.Text = "CallTimes";
+            // 
+            // cbxCount
+            // 
+            this.cbxCount.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.cbxCount.FormattingEnabled = true;
+            this.cbxCount.Location = new System.Drawing.Point(107, 165);
+            this.cbxCount.Name = "cbxCount";
+            this.cbxCount.Size = new System.Drawing.Size(68, 20);
+            this.cbxCount.TabIndex = 12;
+            // 
+            // cbxSeconds
+            // 
+            this.cbxSeconds.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.cbxSeconds.FormattingEnabled = true;
+            this.cbxSeconds.Location = new System.Drawing.Point(293, 164);
+            this.cbxSeconds.Name = "cbxSeconds";
+            this.cbxSeconds.Size = new System.Drawing.Size(68, 20);
+            this.cbxSeconds.TabIndex = 14;
+            // 
+            // label3
+            // 
+            this.label3.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)));
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(192, 168);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(95, 12);
+            this.label3.TabIndex = 13;
+            this.label3.Text = "CallEverySecond";
+            // 
             // MainForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(584, 223);
+            this.Controls.Add(this.cbxSeconds);
+            this.Controls.Add(this.label3);
+            this.Controls.Add(this.cbxCount);
+            this.Controls.Add(this.label2);
             this.Controls.Add(this.txtLogs);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.txtOps);
@@ -98,5 +144,9 @@
         private System.Windows.Forms.TextBox txtOps;
         private System.Windows.Forms.Button btnCall;
         private System.Windows.Forms.TextBox txtLogs;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.ComboBox cbxCount;
+        private System.Windows.Forms.ComboBox cbxSeconds;
+        private System.Windows.Forms.Label label3;
     }
 }

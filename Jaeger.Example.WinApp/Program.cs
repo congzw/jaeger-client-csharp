@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 using Jaeger.Example.WinApp.Helpers;
 
@@ -15,10 +12,17 @@ namespace Jaeger.Example.WinApp
         [STAThread]
         static void Main()
         {
+            Application.ApplicationExit += Application_ApplicationExit;
             JaegerFactory.Init();
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
             Application.Run(new MainForm());
+        }
+        
+        private static void Application_ApplicationExit(object sender, EventArgs e)
+        {
+            //MessageBox.Show(@"!!!Application_ApplicationExit!!!");
+            MyLocalReporter.ShouldRecording = () => false;
         }
     }
 }

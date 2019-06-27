@@ -6,6 +6,8 @@ namespace Jaeger.Example.WinApp.Helpers
 
     public class MyLocalSpan
     {
+        public string OpName { get; set; }
+        public string SpanId { get; set; }
         public string TraceId { get; set; }
         public IList<LogData> Logs { get; set; }
         public Dictionary<string, object> Tags { get; set; }
