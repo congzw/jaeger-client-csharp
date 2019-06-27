@@ -63,7 +63,7 @@ namespace Jaeger.Example.WinApp.Helpers
                 }
                 toSaveSpans.AddRange(myLocalSpans);
                 jsonFileHelper.Save(toSaveSpans, filePath);
-                _logHelper.Info($"try save {toSaveSpans} spans to file: {filePath}");
+                _logHelper.Info($"try save {toSaveSpans.Count} spans to file: {filePath}");
 
                 File.AppendAllText(AppDomain.CurrentDomain.Combine($"trace_flush.txt"), DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss\r\n"));
             }

@@ -38,7 +38,6 @@ namespace Jaeger.Example.WinApp
             this.cbxSeconds.SelectedIndex = 3;
         }
 
-
         protected override Control GetInvoker()
         {
             return this.txtLogs;
@@ -64,13 +63,14 @@ namespace Jaeger.Example.WinApp
             var mockOpName = "MyOp";
             for (int i = 0; i < invokeCount; i++)
             {
-                var theOpName = mockOpName + (i +1).ToString("00");
+                var theOpName = mockOpName + (i + 1).ToString("00");
+                this.txtLogs.AppendText($"\r\n-----Call {theOpName} at {DateTime.Now}-----\r\n");
+                this.txtLogs.AppendText(Environment.NewLine);
+
                 var demoHelper = JaegerFactory.CreateDemoHelper();
                 var opTxt = this.txtOps.Text.Trim();
                 var ops = opTxt.Split(',', ' ', ';', '，', '；').Where(x => !string.IsNullOrWhiteSpace(x)).ToArray();
                 demoHelper.InvokeOp(theOpName, 0, ops);
-                this.txtLogs.AppendText($"-----Call {theOpName} at {DateTime.Now}-----\r\n");
-                this.txtLogs.AppendText(Environment.NewLine);
                 await Task.Delay(TimeSpan.FromSeconds(invokeWait));
             }
 
