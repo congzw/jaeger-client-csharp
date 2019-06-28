@@ -22,10 +22,11 @@ namespace Jaeger.Example.WinApp
         
         private static void Application_ApplicationExit(object sender, EventArgs e)
         {
-            //MessageBox.Show(@"!!!Application_ApplicationExit!!!");
-            var myLocalFileFlusher = JaegerFactory.GetMyLocalFileFlusher();
-            myLocalFileFlusher.ShouldRecording = () => false;
-            myLocalFileFlusher.Dispose();
+            AsyncFormEventBus.ShouldRaise = () => false;
+            var recorder = JaegerFactory.GetMySpanRecorder();
+            recorder.ShouldRecording = () => false;
+            recorder.Flush();
+            //MessageBox.Show(@"ApplicationExit!");
         }
     }
 }

@@ -4,18 +4,18 @@ using Jaeger.Reporters;
 
 namespace Jaeger.Example.WinApp.Traces
 {
-    public class MyLocalReporter : IReporter
+    public class MySpanReporter : IReporter
     {
-        public MyLocalFileFlusher Flusher { get; set; }
+        public IMySpanRecorder Recorder { get; set; }
 
-        public MyLocalReporter(MyLocalFileFlusher flusher)
+        public MySpanReporter(IMySpanRecorder mySpanWriter)
         {
-            Flusher = flusher;
+            Recorder = mySpanWriter;
         }
         public void Report(Span span)
         {
             //async
-            var appendSpanAsync = Flusher.AppendSpanAsync(span);
+            Recorder.RecordSpanAsync(span);
         }
 
         public Task CloseAsync(CancellationToken cancellationToken)

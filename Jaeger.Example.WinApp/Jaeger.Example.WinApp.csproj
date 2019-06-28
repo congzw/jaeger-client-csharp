@@ -60,12 +60,11 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Helpers\AsyncFormEventBus.cs" />
-    <Compile Include="Traces\MyLocalFileFlusher.cs" />
-    <Compile Include="Traces\MyLocalSpan.cs" />
+    <Compile Include="Traces\MySpans.cs" />
     <Compile Include="Helpers\DemoHelper.cs" />
     <Compile Include="Helpers\JaegerFactory.cs" />
-    <Compile Include="Traces\MyLocalReporter.cs" />
-    <Compile Include="Traces\MyLocalSpanConvert.cs" />
+    <Compile Include="Traces\MySpanReporter.cs" />
+    <Compile Include="Traces\MySpanConvert.cs" />
     <Compile Include="Helpers\MyLogHelper.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
@@ -75,6 +74,8 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Traces\MySpanStorage.cs" />
+    <Compile Include="Traces\MySpanRecorder.cs" />
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>

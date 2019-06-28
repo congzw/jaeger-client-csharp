@@ -26,6 +26,11 @@ namespace Jaeger.Example.WinApp.Helpers
 
         public static void Raise<T>(T args) where T : IAsyncFormEvent
         {
+            if (!ShouldRaise())
+            {
+                return;
+            }
+
             if (actions != null)
             {
                 foreach (var action in actions)
@@ -37,6 +42,8 @@ namespace Jaeger.Example.WinApp.Helpers
                 }
             }
         }
+
+        public static Func<bool> ShouldRaise = () => true;
     }
 
     public interface IAsyncFormEvent

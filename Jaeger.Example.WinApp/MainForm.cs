@@ -16,6 +16,8 @@ namespace Jaeger.Example.WinApp
 
         private void MyInitializeComponent()
         {
+            this.Closing += MainForm_Closing;
+
             this.WithPrefix = false;
 
             this.cbxCount.DropDownStyle = ComboBoxStyle.DropDownList;
@@ -38,6 +40,11 @@ namespace Jaeger.Example.WinApp
             this.cbxSeconds.SelectedIndex = 3;
         }
 
+        private void MainForm_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            _loopCancelled = true;
+        }
+
         protected override Control GetInvoker()
         {
             return this.txtLogs;
@@ -53,6 +60,7 @@ namespace Jaeger.Example.WinApp
             this.txtOps.Text = @"FooApi, FooDomain, FooData";
         }
 
+        private bool _loopCancelled = false;
         private async void btnCall_Click(object sender, EventArgs e)
         {
             var invokeCount = int.Parse(this.cbxCount.SelectedItem.ToString());
@@ -63,14 +71,17 @@ namespace Jaeger.Example.WinApp
             var mockOpName = "MyOp";
             for (int i = 0; i < invokeCount; i++)
             {
-                var theOpName = mockOpName + (i + 1).ToString("00");
-                this.txtLogs.AppendText($"\r\n-----Call {theOpName} at {DateTime.Now}-----\r\n");
-                this.txtLogs.AppendText(Environment.NewLine);
+                if (!_loopCancelled)
+                {
+                    var theOpName = mockOpName + (i + 1).ToString("00");
+                    this.txtLogs.AppendText($"\r\n-----Call {theOpName} at {DateTime.Now}-----\r\n");
+                    this.txtLogs.AppendText(Environment.NewLine);
 
-                var demoHelper = JaegerFactory.CreateDemoHelper();
-                var opTxt = this.txtOps.Text.Trim();
-                var ops = opTxt.Split(',', ' ', ';', '，', '；').Where(x => !string.IsNullOrWhiteSpace(x)).ToArray();
-                demoHelper.InvokeOp(theOpName, 0, ops);
+                    var demoHelper = JaegerFactory.CreateDemoHelper();
+                    var opTxt = this.txtOps.Text.Trim();
+                    var ops = opTxt.Split(',', ' ', ';', '，', '；').Where(x => !string.IsNullOrWhiteSpace(x)).ToArray();
+                    demoHelper.InvokeOp(theOpName, 0, ops);
+                }
                 await Task.Delay(TimeSpan.FromSeconds(invokeWait));
             }
 

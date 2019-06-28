@@ -9,6 +9,50 @@ namespace Jaeger.Example.WinApp.Helpers
 {
     public class JaegerFactory
     {
+        public static DemoHelper CreateDemoHelper()
+        {
+            var tracer = GetCurrentTracer();
+            return new DemoHelper(tracer);
+        }
+
+        public static IJsonFileHelper CreateJsonFileHelper()
+        {
+            var jsonFileHelper = JsonFileHelper.Resolve();
+            return jsonFileHelper;
+        }
+
+        private static MySpanStorage _storage = null;
+        public static MySpanStorage GetMySpanStorage()
+        {
+            var jsonFileHelper = CreateJsonFileHelper();
+            return _storage ?? (_storage = new MySpanStorage(jsonFileHelper));
+        }
+
+
+        private static MyLogHelper _myLogHelper = null;
+        public static MyLogHelper GetMyLogHelper()
+        {
+            return _myLogHelper ?? (_myLogHelper = new MyLogHelper("[Default]") { WithPrefix = false });
+        }
+        
+
+        private static MySpanRecorder _recorder = null;
+        public static MySpanRecorder GetMySpanRecorder()
+        {
+            var myRecordStorage = GetMySpanStorage();
+            var myLogHelper = GetMyLogHelper();
+            var convert = new MySpanConvert();
+            return _recorder ?? (_recorder = new MySpanRecorder(myRecordStorage, TimeSpan.FromSeconds(3), convert, myLogHelper));
+        }
+        
+        private static MySpanReporter _theSpanReporter = null;
+        public static MySpanReporter GetMySpanReporter()
+        {
+            var recorder = GetMySpanRecorder();
+            return _theSpanReporter ?? (_theSpanReporter = new MySpanReporter(recorder));
+        }
+
+
         private static Tracer _tracer = null;
         public static Tracer GetCurrentTracer()
         {
@@ -24,46 +68,25 @@ namespace Jaeger.Example.WinApp.Helpers
 
             //try result: 16686:X 14268:OK
             var sender = new HttpSender(endPoint);
-            
+
             var reporter = new RemoteReporter.Builder()
                 .WithLoggerFactory(loggerFactory)
                 .WithMetrics(metrics)
                 .WithSender(sender)
                 .Build();
 
-            _theLocalReporter = GetLocalReporter();
-            var compositeReporter = new CompositeReporter(_theLocalReporter, reporter);
+            _theSpanReporter = GetMySpanReporter();
+            var compositeReporter = new CompositeReporter(_theSpanReporter, reporter);
 
             var tracer = traceBuilder
                 .WithReporter(compositeReporter)
                 .Build();
-            
+
+            //set clock
+            var storage = GetMySpanStorage();
+            storage.GetClock = () => tracer.Clock.UtcNow();
+
             return tracer;
-        }
-
-        public static DemoHelper CreateDemoHelper()
-        {
-            var tracer = GetCurrentTracer();
-            return new DemoHelper(tracer);
-        }
-
-        private static MyLocalFileFlusher _flusher = null;
-        public static MyLocalFileFlusher GetMyLocalFileFlusher()
-        {
-            return _flusher ?? (_flusher = new MyLocalFileFlusher(TimeSpan.FromSeconds(30), new MyLocalSpanConvert(), GetMyLogHelper()));
-        }
-
-        private static MyLogHelper _myLogHelper = null;
-        public static MyLogHelper GetMyLogHelper()
-        {
-            return _myLogHelper ?? (_myLogHelper = new MyLogHelper("[Default]"){WithPrefix = false});
-        }
-
-        private static MyLocalReporter _theLocalReporter = null;
-        public static MyLocalReporter GetLocalReporter()
-        {
-            var myLocalFileFlusher = GetMyLocalFileFlusher();
-            return _theLocalReporter ?? (_theLocalReporter = new MyLocalReporter(myLocalFileFlusher));
         }
 
         public static void Init()

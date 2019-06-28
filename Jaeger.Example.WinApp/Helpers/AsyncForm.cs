@@ -28,6 +28,11 @@ namespace Jaeger.Example.WinApp.Helpers
         //此方法会在非UI线程中被调用
         private void UpdateUi(AsyncFormMessageEvent obj)
         {
+            if (!AsyncFormEventBus.ShouldRaise())
+            {
+                return;
+            }
+
             string value = string.Format("{0} \r\n", obj.Message);
             if (WithPrefix)
             {
