@@ -55,6 +55,7 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Helpers\MyFactory.cs" />
     <Compile Include="Jaegers\EnvVarHelper.cs" />
     <Compile Include="Jaegers\JaegerEnv.cs" />
     <Compile Include="Jaegers\JaegerRunner.cs" />
@@ -99,9 +100,9 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Jaeger.Example.Common\Jaeger.Example.Common.csproj">
-      <Project>{444c52dd-9da5-4897-ac1b-a4e459439247}</Project>
-      <Name>Jaeger.Example.Common</Name>
+    <ProjectReference Include="..\Jaeger.MySpans\Jaeger.MySpans.csproj">
+      <Project>{7813389e-909e-473c-af16-424fd0e8458e}</Project>
+      <Name>Jaeger.MySpans</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

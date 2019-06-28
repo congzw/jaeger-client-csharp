@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Jaeger.Example.Common;
+using Jaeger.Common;
 using OpenTracing;
 
 namespace Jaeger.Example.WinApp.Helpers

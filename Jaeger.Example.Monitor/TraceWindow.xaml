@@ -14,6 +14,7 @@
                 <Button DockPanel.Dock="Bottom" x:Name="BtnStart" Content="开启" Width="75"  Margin="5,0,0,0"/>
                 <Button DockPanel.Dock="Bottom" x:Name="BtnStop" Content="停止" Width="75"  Margin="5,0,0,0"/>
                 <Button DockPanel.Dock="Bottom" x:Name="BtnReset" Content="重置" Width="75"  Margin="5,0,0,0"/>
+                <Button DockPanel.Dock="Bottom" x:Name="BtnLoad" Content="导入" Width="75"  Margin="5,0,0,0"/>
             </StackPanel>
         </Grid>
     </Grid>

@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.IO;
-using System.Text;
 using System.Threading.Tasks;
-using Jaeger.Example.Common;
-using Jaeger.Example.WinApp.Helpers;
+using Microsoft.Extensions.Logging;
 
-namespace Jaeger.Example.WinApp.Traces
+namespace Jaeger.MySpans
 {
     public interface IMySpanRecorder
     {
@@ -28,17 +25,17 @@ namespace Jaeger.Example.WinApp.Traces
         
         public Func<bool> ShouldRecording = () => true;
 
-        private readonly MyLogHelper _logHelper;
+        private readonly ILogger _logHelper;
         private readonly Task _flushTask;
         public TimeSpan FlushInterval { get; set; }
         public ConcurrentQueue<TempSpan> TempSpans { get; set; }
         public MySpanConvert Convert { get; set; }
         public IMySpanStorage Storage { get; set; }
 
-        public MySpanRecorder(IMySpanStorage storage, TimeSpan flushInterval, MySpanConvert convert, MyLogHelper logHelper)
+        public MySpanRecorder(IMySpanStorage storage, TimeSpan flushInterval, MySpanConvert convert, ILogger logger)
         {
             Storage = storage;
-            _logHelper = logHelper;
+            _logHelper = logger;
             FlushInterval = flushInterval;
             Convert = convert;
             TempSpans = new ConcurrentQueue<TempSpan>();
@@ -60,7 +57,7 @@ namespace Jaeger.Example.WinApp.Traces
             }
             catch (Exception ex)
             {
-                _logHelper.InfoException(ex);
+                _logHelper.Log(LogLevel.Error, ex.Message);
             }
         }
 

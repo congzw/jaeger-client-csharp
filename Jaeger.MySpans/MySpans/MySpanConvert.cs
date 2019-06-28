@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Jaeger.Example.WinApp.Traces
+namespace Jaeger.MySpans
 {
     public class MySpanConvert
     {

@@ -1,9 +1,9 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using Jaeger.Example.Common;
+using Jaeger.Common;
 
-namespace Jaeger.Example.WinApp.Traces
+namespace Jaeger.MySpans
 {
     public interface IMySpanStorage
     {

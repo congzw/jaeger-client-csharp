@@ -3,7 +3,7 @@ using System.IO;
 using System.Threading;
 using System.Windows;
 using EzTrace.UI;
-using Jaeger.Example.Common;
+using Jaeger.Common;
 using Jaeger.Example.Monitor.Jaegers;
 
 namespace Jaeger.Example.Monitor.ViewModel
@@ -24,6 +24,12 @@ namespace Jaeger.Example.Monitor.ViewModel
             TheWindow.BtnStart.Click += BtnStart_Click;
             TheWindow.BtnStop.Click += BtnStop_Click;
             TheWindow.BtnReset.Click += BtnReset_Click;
+            TheWindow.BtnLoad.Click += BtnLoad_Click;
+        }
+
+        private void BtnLoad_Click(object sender, RoutedEventArgs e)
+        {
+            //todo
         }
 
         private void BtnStart_Click(object sender, RoutedEventArgs e)

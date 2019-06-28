@@ -1,9 +1,10 @@
 ﻿using System;
-using Jaeger.Example.Common;
-using Jaeger.Example.WinApp.Traces;
+using Jaeger.Common;
+using Jaeger.MySpans;
 using Jaeger.Reporters;
 using Jaeger.Samplers;
 using Jaeger.Senders;
+using Microsoft.Extensions.Logging;
 
 namespace Jaeger.Example.WinApp.Helpers
 {
@@ -29,10 +30,10 @@ namespace Jaeger.Example.WinApp.Helpers
         }
 
 
-        private static MyLogHelper _myLogHelper = null;
-        public static MyLogHelper GetMyLogHelper()
+        private static ILoggerFactory _logFactory = null;
+        public static ILoggerFactory GetLoggerFactory()
         {
-            return _myLogHelper ?? (_myLogHelper = new MyLogHelper("[Default]") { WithPrefix = false });
+            return _logFactory ?? (_logFactory = new MyLoggerFactory());
         }
         
 
@@ -40,9 +41,9 @@ namespace Jaeger.Example.WinApp.Helpers
         public static MySpanRecorder GetMySpanRecorder()
         {
             var myRecordStorage = GetMySpanStorage();
-            var myLogHelper = GetMyLogHelper();
+            var myLogHelper = GetLoggerFactory();
             var convert = new MySpanConvert();
-            return _recorder ?? (_recorder = new MySpanRecorder(myRecordStorage, TimeSpan.FromSeconds(3), convert, myLogHelper));
+            return _recorder ?? (_recorder = new MySpanRecorder(myRecordStorage, TimeSpan.FromSeconds(3), convert, myLogHelper.CreateLogger(null)));
         }
         
         private static MySpanReporter _theSpanReporter = null;
@@ -60,17 +61,20 @@ namespace Jaeger.Example.WinApp.Helpers
         }
         public static Tracer CreateTracer(string endPoint, string serviceName)
         {
-            var traceBuilder = new Tracer.Builder(serviceName)
-                .WithSampler(new ConstSampler(true));
+            var myLoggerFactory = GetLoggerFactory();
 
-            var loggerFactory = traceBuilder.LoggerFactory;
+            var traceBuilder = new Tracer.Builder(serviceName)
+                .WithSampler(new ConstSampler(true))
+                .WithLoggerFactory(myLoggerFactory);
+
+            //var loggerFactory = traceBuilder.LoggerFactory;
             var metrics = traceBuilder.Metrics;
 
             //try result: 16686:X 14268:OK
             var sender = new HttpSender(endPoint);
 
             var reporter = new RemoteReporter.Builder()
-                .WithLoggerFactory(loggerFactory)
+                .WithLoggerFactory(myLoggerFactory)
                 .WithMetrics(metrics)
                 .WithSender(sender)
                 .Build();
@@ -91,8 +95,9 @@ namespace Jaeger.Example.WinApp.Helpers
 
         public static void Init()
         {
-            var myLogHelper = GetMyLogHelper();
-            StringLogExtensions.ShowFunc = msg => myLogHelper.Info(msg);
+            var loggerFactory = GetLoggerFactory();
+            var logger = loggerFactory.CreateLogger(null);
+            StringLogExtensions.ShowFunc = msg => logger.Log(LogLevel.Information, msg);
         }
     }
 }

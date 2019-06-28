@@ -60,11 +60,9 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Helpers\AsyncFormEventBus.cs" />
-    <Compile Include="Traces\MySpans.cs" />
+    <Compile Include="Helpers\MyLoggerFactory.cs" />
     <Compile Include="Helpers\DemoHelper.cs" />
     <Compile Include="Helpers\JaegerFactory.cs" />
-    <Compile Include="Traces\MySpanReporter.cs" />
-    <Compile Include="Traces\MySpanConvert.cs" />
     <Compile Include="Helpers\MyLogHelper.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
@@ -74,8 +72,6 @@
     </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Traces\MySpanStorage.cs" />
-    <Compile Include="Traces\MySpanRecorder.cs" />
     <EmbeddedResource Include="MainForm.resx">
       <DependentUpon>MainForm.cs</DependentUpon>
     </EmbeddedResource>
@@ -103,9 +99,9 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Jaeger.Example.Common\Jaeger.Example.Common.csproj">
-      <Project>{444c52dd-9da5-4897-ac1b-a4e459439247}</Project>
-      <Name>Jaeger.Example.Common</Name>
+    <ProjectReference Include="..\Jaeger.MySpans\Jaeger.MySpans.csproj">
+      <Project>{7813389e-909e-473c-af16-424fd0e8458e}</Project>
+      <Name>Jaeger.MySpans</Name>
     </ProjectReference>
     <ProjectReference Include="..\src\Jaeger.Thrift\Jaeger.Thrift.csproj">
       <Project>{f9ec3615-1d62-4ad3-8e55-0d9ce517a6c6}</Project>

@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using Jaeger.Reporters;
 
-namespace Jaeger.Example.WinApp.Traces
+namespace Jaeger.MySpans
 {
     public class MySpanReporter : IReporter
     {

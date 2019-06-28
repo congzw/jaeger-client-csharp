@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Jaeger.Example.WinApp.Traces
+namespace Jaeger.MySpans
 {
     //todo: short name for smaller json content size
     public class MyRecord

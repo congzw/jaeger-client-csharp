@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Windows.Forms;
 using Jaeger.Example.WinApp.Helpers;
-using Jaeger.Example.WinApp.Traces;
 
 namespace Jaeger.Example.WinApp
 {
