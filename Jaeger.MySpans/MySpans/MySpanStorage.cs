@@ -14,27 +14,27 @@ namespace Jaeger.MySpans
 
     public class MySpanStorage : IMySpanStorage
     {
-        public MySpanStorage(IJsonFileHelper jsonFileHelper)
+        public MySpanStorage(IJsonFileHelper jsonFileHelper, Func<string> getTraceFolderPath)
         {
             JsonFile = jsonFileHelper;
             GetClock = () => DateTime.Now;
-            TraceFolder = "traces";
+            GetTraceFolderPath = getTraceFolderPath;
         }
 
         public IJsonFileHelper JsonFile { get; set; }
 
         public Func<DateTime> GetClock { get; set; }
 
-        public string TraceFolder { get; set; }
+        public Func<string> GetTraceFolderPath { get; set; }
 
         public string AutoCreateFilePath()
         {
-            var folder = AppDomain.CurrentDomain.Combine(TraceFolder);
+            var folder = GetTraceFolderPath();
             if (!Directory.Exists(folder))
             {
                 Directory.CreateDirectory(folder);
             }
-            var filePath = AppDomain.CurrentDomain.Combine(TraceFolder, $"{GetClock():yyyy-MM-dd_HH}.json");
+            var filePath = Path.Combine(folder, $"{GetClock():yyyy-MM-dd_HH}.json");
             return filePath;
         }
 
@@ -83,12 +83,12 @@ namespace Jaeger.MySpans
         
         private void RecordRefresh(int count, DateTime clock)
         {
-            var folder = AppDomain.CurrentDomain.Combine(TraceFolder);
+            var folder = GetTraceFolderPath();
             if (!Directory.Exists(folder))
             {
                 Directory.CreateDirectory(folder);
             }
-            var filePath = AppDomain.CurrentDomain.Combine(TraceFolder, "_flush.txt");
+            var filePath = Path.Combine(folder, "_flush.txt");
             File.AppendAllText(filePath,  $@"{clock:yyyy-MM-dd HH:mm:ss} flush span count: {count}{Environment.NewLine}");
         }
     }

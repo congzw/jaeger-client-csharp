@@ -26,7 +26,7 @@ namespace Jaeger.Example.WinApp.Helpers
         public static MySpanStorage GetMySpanStorage()
         {
             var jsonFileHelper = CreateJsonFileHelper();
-            return _storage ?? (_storage = new MySpanStorage(jsonFileHelper));
+            return _storage ?? (_storage = new MySpanStorage(jsonFileHelper, () => AppDomain.CurrentDomain.Combine("traces")));
         }
 
 

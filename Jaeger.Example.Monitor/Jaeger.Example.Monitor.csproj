@@ -104,6 +104,10 @@
       <Project>{7813389e-909e-473c-af16-424fd0e8458e}</Project>
       <Name>Jaeger.MySpans</Name>
     </ProjectReference>
+    <ProjectReference Include="..\src\Jaeger\Jaeger.csproj">
+      <Project>{aba4f1b1-f6d0-40a9-904b-efa98a4c0411}</Project>
+      <Name>Jaeger</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
