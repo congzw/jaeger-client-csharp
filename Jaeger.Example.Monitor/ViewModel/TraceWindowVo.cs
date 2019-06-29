@@ -1,10 +1,16 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Reflection;
+using System.Reflection.Emit;
 using System.Threading;
 using System.Windows;
 using EzTrace.UI;
 using Jaeger.Common;
+using Jaeger.Example.Monitor.Helpers;
 using Jaeger.Example.Monitor.Jaegers;
+using Jaeger.MySpans;
 
 namespace Jaeger.Example.Monitor.ViewModel
 {
@@ -29,7 +35,40 @@ namespace Jaeger.Example.Monitor.ViewModel
 
         private void BtnLoad_Click(object sender, RoutedEventArgs e)
         {
-            //todo
+            //todo clear current
+            var spanLoader = MyFactory.GetMySpanLoader();
+            var myRecords = spanLoader.GetMyRecords();
+
+            var endPoint = @"http://localhost:14268/api/traces";
+            var mockTracerFactory = MyFactory.GetMockTracerFactory(endPoint);
+            var convert = MyFactory.CreateMySpanConvert();
+            var loggerFactory = MyFactory.GetLoggerFactory();
+
+
+            foreach (var myRecord in myRecords)
+            {
+                var tempSpans = convert.ConvertBackToTempSpans(myRecord);
+                var spanDic = convert.ConvertBackToSpanDic(tempSpans, mockTracerFactory, loggerFactory);
+                foreach (var spanItem in spanDic)
+                {
+                    var tempSpan = spanItem.Key;
+                    var span = spanItem.Value;
+                    Console.WriteLine(@"=> report: {0} with trace-span: {1}-{2}", tempSpan.Span.OpName, tempSpan.Span.TraceId, tempSpan.Span.SpanId);
+                    //report to collector
+                    span.Finish(tempSpan.Span.StopTime);
+                }
+            }
+        }
+        private object Create(Assembly assembly, string theTypeFullName, params object[] args)
+        {
+            var theOne = assembly.CreateInstance(theTypeFullName,
+                true,
+                BindingFlags.NonPublic | BindingFlags.Instance,
+                null,
+                args,
+                null,
+                null);
+            return theOne;
         }
 
         private void BtnStart_Click(object sender, RoutedEventArgs e)

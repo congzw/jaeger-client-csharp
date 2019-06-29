@@ -1,7 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Reflection;
 using Jaeger.Common;
 using Jaeger.MySpans;
+using Microsoft.Extensions.Logging;
 
 namespace Jaeger.Example.Monitor.Helpers
 {
@@ -13,32 +14,38 @@ namespace Jaeger.Example.Monitor.Helpers
             return jsonFileHelper;
         }
 
-
         private static MySpanStorage _storage = null;
         public static MySpanStorage GetMySpanStorage()
         {
             var jsonFileHelper = CreateJsonFileHelper();
             return _storage ?? (_storage = new MySpanStorage(jsonFileHelper, () => AppDomain.CurrentDomain.Combine("traces")));
         }
-    }
 
-    public class MySpanLoader
-    {
-        public MySpanStorage Storage { get; set; }
-
-        public MySpanLoader(MySpanStorage storage)
+        private static MySpanLoader _spanLoader = null;
+        public static MySpanLoader GetMySpanLoader()
         {
-            Storage = storage;
+            var storage = GetMySpanStorage();
+            return _spanLoader ?? (_spanLoader = new MySpanLoader(storage));
         }
 
-        public IList<MyRecord> GetMyRecords()
+        public static MySpanConvert CreateMySpanConvert()
         {
-            return null;
+            var convert = new MySpanConvert();
+            convert.SpanAssembly = Assembly.LoadFile(AppDomain.CurrentDomain.Combine("Jaeger.dll"));
+            return convert;
         }
 
-        public IList<Span> LoadSpans(params MyRecord[] myRecords)
+
+        private static ILoggerFactory _logFactory = null;
+        public static ILoggerFactory GetLoggerFactory()
         {
-            return new List<Span>();
+            return _logFactory ?? (_logFactory = new MyLoggerFactory());
+        }
+        
+        private static MockTracerFactory _mockTracerFactory = null;
+        public static MockTracerFactory GetMockTracerFactory(string endPoint)
+        {
+            return _mockTracerFactory ?? (_mockTracerFactory = new MockTracerFactory(endPoint));
         }
     }
 }

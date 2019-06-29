@@ -1,11 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Reflection;
+using Jaeger.Common;
+using Jaeger.Thrift;
+using Microsoft.Extensions.Logging;
 
 namespace Jaeger.MySpans
 {
     public class MySpanConvert
     {
+        public Assembly SpanAssembly { get; set; }
+
         public TempSpan ConvertToTempSpan(Span span, DateTime stopUtc)
         {
             var myLocalSpan = new MySpan();
@@ -71,6 +78,125 @@ namespace Jaeger.MySpans
             }
 
             return myRecord;
+        }
+
+        public IList<TempSpan> ConvertBackToTempSpans(MyRecord myRecord)
+        {
+            var tempSpans = new List<TempSpan>();
+            if (myRecord == null)
+            {
+                return tempSpans;
+            }
+
+            var processes = myRecord.Processes;
+            var mySpans = myRecord.Spans;
+
+            foreach (var mySpan in mySpans)
+            {
+                var process = processes.Single(x => x.CreateKey() == mySpan.ProcessKey);
+                var tempSpan = new TempSpan(process, mySpan);
+                tempSpans.Add(tempSpan);
+            }
+
+            return tempSpans;
+        }
+
+        public IDictionary<TempSpan, Span> ConvertBackToSpanDic(IList<TempSpan> tempSpans,
+            MockTracerFactory mockTracerFactory, ILoggerFactory loggerFactory)
+        {
+            var spanDic = new Dictionary<TempSpan, Span>();
+            foreach (var tempSpan in tempSpans)
+            {
+                var tracer = mockTracerFactory.GetTracer(tempSpan.Process.ServiceName, loggerFactory);
+                var span = CreateSpan(tempSpan, tracer);
+                spanDic.Add(tempSpan, span);
+            }
+            return spanDic;
+        }
+        
+        private Span CreateSpan(TempSpan tempSpan, Tracer tracer)
+        {
+            var mySpan = tempSpan.Span;
+            var tags = mySpan.Tags;
+            
+            var parentId = TryFindParentId(mySpan);
+            var context = new SpanContext(TraceId.FromString(mySpan.TraceId),
+                SpanId.FromString(mySpan.SpanId),
+                parentId,
+                (SpanContextFlags)mySpan.Flags);
+
+            if (SpanAssembly == null)
+            {
+                var filePath = AppDomain.CurrentDomain.Combine("Jaeger.dll");
+                if (!File.Exists(filePath))
+                {
+                    throw new InvalidOperationException("SpanAssembly Not Found: " + filePath);
+                }
+                SpanAssembly = Assembly.LoadFile(filePath);
+            }
+
+            var references = new List<Reference>();
+            foreach (var reference in mySpan.References)
+            {
+                references.Add(new Reference(context, reference.Type));
+            }
+
+            //hack it, attention for same types, or fail wit ex: System.MissingMethodException!
+            //internal Span(
+            //    Tracer tracer,
+            //    string operationName,
+            //    SpanContext context,
+            //    DateTime startTimestampUtc,
+            //    Dictionary<string, object> tags,
+            //    IReadOnlyList<Reference> references)
+            var span = CreateSpanWithReflection(SpanAssembly,
+                tracer,
+                mySpan.OpName, 
+                context,
+                mySpan.StartTime.ToUniversalTime(),
+                tags,
+                references.AsReadOnly()
+                );
+
+            var logs = mySpan.Logs;
+            foreach (var log in logs)
+            {
+                span.Log(log.TimestampUtc, log.Fields);
+            }
+            
+            //span.Finish(mySpan.StopTime);
+            return span;
+        }
+
+        private SpanId TryFindParentId(MySpan mySpan)
+        {
+            var myLocalReferences = mySpan.References;
+            if (myLocalReferences != null)
+            {
+                foreach (var reference in myLocalReferences)
+                {
+                    //reference.Type may be lower case!
+                    if ("CHILD_OF".Equals(reference.Type, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return SpanId.FromString(reference.SpanID);
+                    }
+                }
+            }
+            return new SpanId();
+        }
+
+        private Span CreateSpanWithReflection(Assembly assembly, params object[] args)
+        {
+            var instance = assembly.CreateInstance(
+                "Jaeger.Span",
+                true,
+                BindingFlags.NonPublic | BindingFlags.Instance,
+                null,
+                args,
+                null,
+                null);
+            return (Span)instance;
+
         }
     }
 }
