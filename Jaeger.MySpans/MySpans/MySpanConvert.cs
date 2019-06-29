@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using Jaeger.Common;
-using Jaeger.Thrift;
 using Microsoft.Extensions.Logging;
 
 namespace Jaeger.MySpans
@@ -50,7 +49,7 @@ namespace Jaeger.MySpans
             {
                 myLocalSpan.Logs.Add(MyLogData.Create(log));
             }
-            
+
             var myProcess = new MyProcess();
             myProcess.ServiceName = span.Tracer.ServiceName;
             foreach (var keyValuePair in span.Tracer.Tags)
@@ -108,17 +107,17 @@ namespace Jaeger.MySpans
             foreach (var tempSpan in tempSpans)
             {
                 var tracer = mockTracerFactory.GetTracer(tempSpan.Process.ServiceName, loggerFactory);
-                var span = CreateSpan(tempSpan, tracer);
+                var span = ConvertToSpan(tempSpan, tracer);
                 spanDic.Add(tempSpan, span);
             }
             return spanDic;
         }
-        
-        private Span CreateSpan(TempSpan tempSpan, Tracer tracer)
+
+        private Span ConvertToSpan(TempSpan tempSpan, Tracer tracer)
         {
             var mySpan = tempSpan.Span;
             var tags = mySpan.Tags;
-            
+
             var parentId = TryFindParentId(mySpan);
             var context = new SpanContext(TraceId.FromString(mySpan.TraceId),
                 SpanId.FromString(mySpan.SpanId),
@@ -149,21 +148,36 @@ namespace Jaeger.MySpans
             //    DateTime startTimestampUtc,
             //    Dictionary<string, object> tags,
             //    IReadOnlyList<Reference> references)
+
             var span = CreateSpanWithReflection(SpanAssembly,
                 tracer,
-                mySpan.OpName, 
+                mySpan.OpName,
                 context,
                 mySpan.StartTime.ToUniversalTime(),
                 tags,
                 references.AsReadOnly()
                 );
 
+
             var logs = mySpan.Logs;
             foreach (var log in logs)
             {
-                span.Log(log.TimestampUtc, log.Fields);
+                if (log.Message != null)
+                {
+                    //"fields": [
+                    //{
+                    //    "key": "event",
+                    //    "type": "string",
+                    //    "value": "myLog by FooDomain"
+                    //}
+                    span.Log(log.TimestampUtc, log.Message);
+                }
+                else
+                {
+                    span.Log(log.TimestampUtc, log.Fields);
+                }
             }
-            
+
             //span.Finish(mySpan.StopTime);
             return span;
         }

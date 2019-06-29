@@ -16,9 +16,10 @@ namespace Jaeger.MySpans
     {
         public Task RecordSpanAsync(Span span)
         {
+            var utcNow = span.Tracer.Clock.UtcNow();
             return Task.Run(() =>
             {
-                var temp = Convert.ConvertToTempSpan(span, span.Tracer.Clock.UtcNow());
+                var temp = Convert.ConvertToTempSpan(span, utcNow);
                 TempSpans.Enqueue(temp);
             });
         }
